@@ -1,0 +1,140 @@
+<!--
+  EQ_Form.html
+  Serve via HtmlService (e.g. return HtmlService.createTemplateFromFile('EQ_Form').evaluate()
+  from your doGet router, the same way you likely serve DISC_Form.html today).
+  Expects participantId and participantName to be passed in as URL params
+  and injected server-side, or hardcoded here via scriptlets if you
+  template it — placeholders below assume simple query-string read.
+-->
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body { font-family: Arial, sans-serif; max-width: 640px; margin: 30px auto; color: #222; }
+    h1 { font-size: 20px; }
+    p.intro { font-size: 13px; color: #555; }
+    .item { margin-bottom: 18px; padding-bottom: 12px; border-bottom: 1px solid #eee; }
+    .item p { margin: 0 0 8px 0; font-size: 14px; }
+    .scale { display: flex; justify-content: space-between; max-width: 400px; }
+    .scale label { font-size: 11px; color: #666; text-align: center; flex: 1; }
+    .scale input { display: block; margin: 0 auto 4px auto; }
+    button { background: #4A6FA5; color: white; border: none; padding: 10px 20px; font-size: 14px; border-radius: 4px; cursor: pointer; }
+    button:disabled { background: #aaa; }
+    #status { margin-top: 14px; font-size: 13px; }
+  </style>
+</head>
+<body>
+  <h1>Emotional Intelligence Self-Assessment</h1>
+  <p class="intro">
+    Rate each statement from 1 (Rarely/Never true of me) to 5 (Almost always true of me).
+    There are no right or wrong answers — answer based on how you actually are, not how you'd like to be.
+  </p>
+
+  <form id="eqForm">
+    <div id="itemsContainer"></div>
+    <button type="submit" id="submitBtn">Submit</button>
+    <div id="status"></div>
+  </form>
+
+  <script>
+    // Item bank mirrors EQ_ITEMS in SelfAwarenessSuite.gs — keep these in sync.
+    const EQ_ITEMS = [
+      { id: 'SA1', text: "I can usually name the specific emotion I'm feeling in the moment." },
+      { id: 'SA2', text: "I notice physical signs (tight chest, clenched jaw) before I realize I'm upset." },
+      { id: 'SA3', text: "I'm often surprised by my own emotional reactions." },
+      { id: 'SA4', text: "I understand how my moods affect my decisions." },
+      { id: 'SA5', text: "I know which situations reliably trigger stress or frustration for me." },
+      { id: 'SA6', text: "I have a clear sense of my own strengths and limitations." },
+      { id: 'SA7', text: "I rarely reflect on why I reacted the way I did after a conflict." },
+      { id: 'SA8', text: "Feedback about my blind spots rarely feels surprising to me." },
+      { id: 'SR1', text: "When I feel angry, I can pause before reacting." },
+      { id: 'SR2', text: "I say things I regret when I'm stressed." },
+      { id: 'SR3', text: "I stay composed under pressure better than most people I know." },
+      { id: 'SR4', text: "I adapt well when plans change unexpectedly." },
+      { id: 'SR5', text: "Small setbacks can derail my whole day." },
+      { id: 'SR6', text: "I hold myself accountable rather than blaming circumstances." },
+      { id: 'SR7', text: "I can calm myself down without relying on someone else." },
+      { id: 'SR8', text: "I act impulsively when emotions run high." },
+      { id: 'MO1', text: "I keep working toward goals even without external rewards." },
+      { id: 'MO2', text: "Setbacks make me want to quit rather than try again." },
+      { id: 'MO3', text: "I hold myself to a high personal standard." },
+      { id: 'MO4', text: "I look for the opportunity in a difficult situation." },
+      { id: 'MO5', text: "I lose enthusiasm quickly when a project gets hard." },
+      { id: 'MO6', text: "I set goals for myself even when no one is checking on me." },
+      { id: 'MO7', text: "I bounce back from failure faster than I used to." },
+      { id: 'MO8', text: "I need frequent praise to stay motivated." },
+      { id: 'EM1', text: "I can tell when someone is upset even if they don't say so." },
+      { id: 'EM2', text: "I find it hard to see things from another person's point of view." },
+      { id: 'EM3', text: "People tell me I'm a good listener." },
+      { id: 'EM4', text: "I consider how a decision will affect others before making it." },
+      { id: 'EM5', text: "I get impatient with people who are struggling emotionally." },
+      { id: 'EM6', text: "I can sense the mood of a room or group quickly." },
+      { id: 'EM7', text: "I adjust how I communicate based on who I'm talking to." },
+      { id: 'EM8', text: "I tend to focus on my own reaction rather than the other person's." },
+      { id: 'SS1', text: "I can influence others without being pushy." },
+      { id: 'SS2', text: "I avoid conflict even when it needs to be addressed." },
+      { id: 'SS3', text: "I build rapport with new people fairly easily." },
+      { id: 'SS4', text: "I can deliver critical feedback without damaging the relationship." },
+      { id: 'SS5', text: "I struggle to resolve disagreements without them escalating." },
+      { id: 'SS6', text: "People come to me to help mediate their disagreements." },
+      { id: 'SS7', text: "I work well on teams with people very different from me." },
+      { id: 'SS8', text: "I find it hard to build trust with new colleagues or clients." }
+    ];
+
+    const container = document.getElementById('itemsContainer');
+    EQ_ITEMS.forEach((item, idx) => {
+      const div = document.createElement('div');
+      div.className = 'item';
+      div.innerHTML = `
+        <p>${idx + 1}. ${item.text}</p>
+        <div class="scale">
+          ${[1,2,3,4,5].map(v => `
+            <label>
+              <input type="radio" name="${item.id}" value="${v}" required>
+              ${v}
+            </label>`).join('')}
+        </div>`;
+      container.appendChild(div);
+    });
+
+    // Read participant info from URL query params, e.g. ?pid=123&pname=Jane
+    const params = new URLSearchParams(window.location.search);
+    const participantId = params.get('pid') || '';
+    const participantName = params.get('pname') || '';
+
+    document.getElementById('eqForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const btn = document.getElementById('submitBtn');
+      const status = document.getElementById('status');
+      btn.disabled = true;
+      status.textContent = 'Submitting...';
+
+      const formData = new FormData(e.target);
+      const payload = {
+        action: 'submitEQ',
+        participantId: participantId,
+        participantName: participantName
+      };
+      EQ_ITEMS.forEach(item => {
+        payload[item.id] = formData.get(item.id);
+      });
+
+      // google.script.run works when this page is served from HtmlService
+      // directly. If instead you're posting to a deployed Web App URL,
+      // swap this block for a fetch() POST to that URL with `payload`
+      // as URL-encoded form data.
+      google.script.run
+        .withSuccessHandler(function() {
+          status.textContent = 'Thank you — your responses have been recorded.';
+        })
+        .withFailureHandler(function(err) {
+          status.textContent = 'Something went wrong: ' + err.message;
+          btn.disabled = false;
+        })
+        .routeSelfAwarenessSuite({ parameter: payload });
+    });
+  </script>
+</body>
+</html>
