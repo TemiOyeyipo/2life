@@ -9,7 +9,7 @@
  * existing one), the URL changes and this file needs updating.
  */
 const CONFIG = {
-  API_URL: 'PASTE_YOUR_APPS_SCRIPT_WEB_APP_URL_HERE'
+  API_URL: 'https://script.google.com/macros/s/AKfycbz8-p5DMqg28tWsFmgxZcRofKjhnTbDAwUhnFUIwOV44ns5K_ynLQVIOd0Emq8VTtQi/exec'
 };
 
 
