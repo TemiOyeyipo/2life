@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<base target="_top">
+<meta charset="utf-8">
+<title>Johari Window</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=Cinzel:wght@700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#142033; --paper:#F2F4F7; --white:#fff; --line:#D3D9E1; --muted:#586477;
+    --arena:#1F8A70; --blind:#C1440E; --facade:#7B4B94;
+    --ui:'Bricolage Grotesque', system-ui, sans-serif;
+    --read:'Source Serif 4', Georgia, serif;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--ui);font-size:17px;line-height:1.5}
+  h1,h2,h3{font-weight:800;line-height:1.15;margin:0;letter-spacing:-.02em}
+  p{margin:0 0 1em}
+  button{font:inherit;color:inherit;cursor:pointer}
+  :focus-visible{outline:3px solid var(--ink);outline-offset:2px}
+
+  .top{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:16px clamp(16px,4vw,40px);border-bottom:1px solid var(--line);background:var(--white)}
+  .logo{height:34px;width:auto;display:block}
+  .link{background:none;border:0;padding:8px 0;text-decoration:underline;text-underline-offset:3px;font-weight:600;color:inherit}
+  main{max-width:820px;margin:0 auto;padding:clamp(20px,5vw,56px) clamp(16px,4vw,40px)}
+  footer{max-width:820px;margin:0 auto;padding:0 clamp(16px,4vw,40px) 40px;color:var(--muted);font-size:14px}
+
+  .btn{display:inline-block;border:0;border-radius:999px;padding:14px 28px;font-weight:700;background:var(--ink);color:#fff;min-height:48px}
+  .btn[disabled]{opacity:.35;cursor:not-allowed}
+  .btn.ghost{background:transparent;color:var(--ink);border:2px solid var(--ink)}
+
+  h1.page{font-size:clamp(30px,5.5vw,46px);margin-bottom:12px}
+  .lede{font-family:var(--read);font-size:19px;color:#2b3850;max-width:38em}
+
+  form.stack{display:grid;gap:14px;margin-top:20px;max-width:460px}
+  label{display:grid;gap:6px;font-weight:600;font-size:15px}
+  input{font:inherit;padding:12px 14px;border:1.5px solid var(--line);border-radius:10px;background:#fff;min-height:48px}
+  .fine{font-size:14px;color:var(--muted);margin:0}
+  .err{color:#B3261E;font-weight:600;min-height:1.4em;margin:0}
+
+  .center{text-align:center;padding:60px 0}
+  .spin{width:34px;height:34px;border:4px solid var(--line);border-top-color:var(--ink);border-radius:50%;margin:0 auto 16px;animation:sp .9s linear infinite}
+  @keyframes sp{to{transform:rotate(360deg)}}
+
+  .tabs{display:flex;gap:8px;margin-bottom:24px;border-bottom:1px solid var(--line)}
+  .tab{padding:10px 4px;font-weight:700;font-size:15px;border-bottom:3px solid transparent;background:none;border-radius:0}
+  .tab.active{border-bottom-color:var(--ink)}
+
+  .wordgrid{display:grid;grid-template-columns:repeat(auto-fill, minmax(130px, 1fr));gap:8px;margin:16px 0}
+  .wordgrid label{display:flex;align-items:center;font-size:13.5px;font-weight:500;border:1.5px solid var(--line);border-radius:10px;padding:8px 10px;cursor:pointer;background:#fff}
+  .wordgrid label.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+  .wordgrid input{margin-right:6px}
+  .wcount{font-size:14px;color:var(--muted);margin-bottom:8px}
+  .wcount.over{color:#B3261E;font-weight:700}
+
+  .idbox{display:inline-block;margin-top:8px;padding:10px 14px;border:1.5px dashed var(--muted);border-radius:10px;font-size:15px}
+  .idbox b{font-size:16px;letter-spacing:.03em;word-break:break-all}
+
+  .linkRow{display:flex;gap:8px;align-items:center;margin-top:10px;max-width:460px}
+  .linkRow input{flex:1;font-size:12.5px;color:var(--muted);background:var(--paper)}
+  .copyNote{font-size:12px;color:var(--arena);font-weight:700;min-width:60px}
+
+  .progWrap{max-width:420px;margin:24px 0}
+  .progTrack{height:10px;background:#E2E7ED;border-radius:8px;overflow:hidden}
+  .progTrack i{display:block;height:100%;background:var(--ink)}
+  .progLabel{font-size:14px;color:var(--muted);margin-top:8px}
+
+  .quadGrid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:20px 0}
+  @media (max-width:600px){.quadGrid{grid-template-columns:1fr}}
+  .quad{border:1.5px solid var(--line);border-radius:14px;padding:16px 18px;background:#fff;border-top:8px solid var(--qc)}
+  .quad h3{font-size:16px;margin-bottom:4px}
+  .quad .sub{font-size:12.5px;color:var(--muted);margin-bottom:10px}
+  .chip{display:inline-block;font-size:13px;font-weight:600;background:var(--paper);border-radius:999px;padding:4px 10px;margin:0 6px 6px 0}
+  .chip b{color:var(--muted);font-weight:600;margin-left:3px}
+
+  .actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:30px}
+</style>
+</head>
+<body>
+<header class="top">
+  <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+    <svg class="logo" viewBox="0 0 540 120" role="img" aria-label="L'chaim: Nourishing Life &amp; Spirit">
+      <g transform="translate(10, 0)">
+        <path d="M 55 18 L 55 10 M 39 24 L 34 19 M 71 24 L 76 19 M 28 40 L 20 38 M 82 40 L 90 38"
+              stroke="#D4A359" stroke-width="2.2" stroke-linecap="round" opacity="0.85"/>
+        <path d="M 30 65 A 28 28 0 1 1 80 65"
+              fill="none" stroke="#2C3E35" stroke-width="3.8" stroke-linecap="round"/>
+        <path d="M 55 38 C 36 55 32 78 55 94 C 78 78 74 55 55 38 Z" fill="#4A6B5D" opacity="0.95"/>
+        <path d="M 55 94 C 50 81 50 65 55 54 C 60 65 60 81 55 94 Z" fill="#C87D55"/>
+      </g>
+      <text x="125" y="66" font-family="'Cinzel', Georgia, serif" font-size="44" font-weight="700" letter-spacing="2.8" fill="#2C3E35">L'chaim</text>
+      <text x="127" y="88" font-family="Arial, Helvetica, sans-serif" font-size="11.5" font-weight="600" letter-spacing="4.5" fill="#C87D55" opacity="0.95">NOURISHING LIFE &amp; SPIRIT</text>
+    </svg>
+    <span style="width:1.5px;height:24px;background:var(--line)"></span>
+    <span style="font-size:15px;color:var(--muted);font-weight:800">Johari Window</span>
+  </div>
+  <div style="display:flex;align-items:center;gap:16px">
+    <a class="link" href="home.html">Suite home</a>
+  </div>
+</header>
+<main id="app" aria-live="polite"></main>
+<footer>
+  The Johari Window compares how you describe yourself to how the colleagues you invite describe you. No single
+  colleague's answers are ever shown individually.
+</footer>
+
+<script src="config.js"></script>
+<script>
+const $ = (s, el) => (el || document).querySelector(s);
+const app = $('#app');
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const call = (fn, params) => fetch(CONFIG.API_URL, {
+  method: 'POST',
+  body: JSON.stringify({ fn, ...(params || {}) })
+})
+  .then(res => res.json())
+  .then(data => {
+    if (!data || !data.ok) throw new Error((data && data.error) || 'Something went wrong. Please try again.');
+    return data.data;
+  })
+  .catch(err => { throw new Error(err.message || 'Could not reach the server. Please try again.'); });
+
+const params = new URLSearchParams(window.location.search);
+const urlSessionId = params.get('s') || '';
+
+const state = { adjectives: [], min: 4, max: 8, tab: urlSessionId ? 'check' : 'start', selected: new Set(), user: {} };
+
+function loading(text) {
+  app.innerHTML = `<div class="center"><div class="spin"></div><p>${esc(text)}</p></div>`;
+}
+
+function wordGrid(selected) {
+  return `
+    <div class="wcount" id="wcount"></div>
+    <div class="wordgrid" id="wordgrid">
+      ${state.adjectives.map(w => `
+        <label class="${selected.has(w) ? 'on' : ''}" data-w="${esc(w)}">
+          <input type="checkbox" value="${esc(w)}" ${selected.has(w) ? 'checked' : ''}> ${esc(w)}
+        </label>`).join('')}
+    </div>`;
+}
+
+function wireWordGrid(selectedSet, onChange) {
+  updateWcount(selectedSet);
+  $('#wordgrid').querySelectorAll('label').forEach(label => {
+    label.addEventListener('click', ev => {
+      ev.preventDefault();
+      const w = label.dataset.w;
+      if (selectedSet.has(w)) selectedSet.delete(w);
+      else if (selectedSet.size < state.max) selectedSet.add(w);
+      label.classList.toggle('on', selectedSet.has(w));
+      label.querySelector('input').checked = selectedSet.has(w);
+      updateWcount(selectedSet);
+      if (onChange) onChange();
+    });
+  });
+}
+
+function updateWcount(selectedSet) {
+  const el = $('#wcount');
+  if (!el) return;
+  const n = selectedSet.size;
+  el.textContent = `Choose ${state.min}\u2013${state.max} words: ${n} selected`;
+  el.classList.toggle('over', n > state.max);
+}
+
+/* ---------- Tabs shell ---------- */
+function shell(bodyHtml) {
+  app.innerHTML = `
+    <div class="tabs">
+      <button class="tab ${state.tab === 'start' ? 'active' : ''}" id="tabStart" type="button">Start a reflection</button>
+      <button class="tab ${state.tab === 'check' ? 'active' : ''}" id="tabCheck" type="button">Check my results</button>
+    </div>
+    <div id="tabBody"></div>`;
+  $('#tabBody').innerHTML = bodyHtml;
+  $('#tabStart').addEventListener('click', () => { state.tab = 'start'; state.selected = new Set(); viewStart(); });
+  $('#tabCheck').addEventListener('click', () => { state.tab = 'check'; viewCheckForm(); });
+}
+
+/* ---------- Start flow ---------- */
+async function viewStart(msg) {
+  loading('Loading the word list');
+  try {
+    if (!state.adjectives.length) {
+      const data = await call('johariGetAdjectives');
+      state.adjectives = data.adjectives; state.min = data.min; state.max = data.max;
+    }
+  } catch (e) {
+    shell(`<p class="err" role="alert">${esc(e.message)}</p>`);
+    return;
+  }
+
+  shell(`
+    <h1 class="page">How do you show up to others?</h1>
+    <p class="lede">Pick ${state.min}\u2013${state.max} words below that describe you. Then invite a few colleagues to do the same about you \u2014 the gap between the two is where the real insight is.</p>
+    ${wordGrid(state.selected)}
+    <form class="stack" id="startForm" novalidate>
+      <label>Full name<input id="name" autocomplete="name" required value="${esc(state.user.name || '')}"></label>
+      <label>Email<input id="email" type="email" autocomplete="email" required value="${esc(state.user.email || '')}"></label>
+      <label>Role (optional)<input id="role" value="${esc(state.user.role || '')}"></label>
+      <label>Team or group (optional)<input id="team" value="${esc(state.user.team || '')}"></label>
+      <p class="fine">We'll email you a link to share with colleagues, plus a link to check your results once enough of them respond.</p>
+      <p class="err" id="err" role="alert">${esc(msg || '')}</p>
+      <button class="btn" type="submit">Start my reflection</button>
+    </form>`);
+
+  wireWordGrid(state.selected);
+
+  $('#startForm').addEventListener('submit', async ev => {
+    ev.preventDefault();
+    const name = $('#name').value.trim(), email = $('#email').value.trim();
+    const role = $('#role').value.trim(), team = $('#team').value.trim();
+    if (!name) return ($('#err').textContent = 'Enter your name to continue.');
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return ($('#err').textContent = 'Enter a valid email address.');
+    if (state.selected.size < state.min || state.selected.size > state.max) {
+      return ($('#err').textContent = `Choose between ${state.min} and ${state.max} words.`);
+    }
+    state.user = { name, email, role, team };
+    loading('Setting up your reflection');
+    try {
+      const res = await call('johariCreateSession', { payload: { ...state.user, adjectives: [...state.selected] } });
+      viewStarted(res);
+    } catch (e) { viewStart(e.message); }
+  });
+}
+
+function viewStarted(res) {
+  shell(`
+    <h1 class="page">You're set up</h1>
+    <p class="lede">We've emailed you both links below. Share the first with colleagues \u2014 your results unlock once at least ${res.minPeers} respond.</p>
+    <p class="idbox">Session ID <b>${esc(res.sessionId)}</b></p>
+
+    <label style="display:block;margin-top:20px;font-weight:600;font-size:14px;">Link to share with colleagues</label>
+    <div class="linkRow">
+      <input type="text" id="peerLinkInput" readonly value="${esc(res.peerLink || res.sessionId)}">
+      <span class="copyNote" id="copyNote1"></span>
+    </div>
+
+    <label style="display:block;margin-top:16px;font-weight:600;font-size:14px;">Link to check your results later</label>
+    <div class="linkRow">
+      <input type="text" id="selfLinkInput" readonly value="${esc(res.selfLink || (window.location.href.split('?')[0] + '?s=' + res.sessionId))}">
+      <span class="copyNote" id="copyNote2"></span>
+    </div>
+
+    <div class="actions">
+      <button class="btn" type="button" id="goCheck">Check results now</button>
+    </div>`);
+
+  function wireCopy(inputId, noteId) {
+    $('#' + inputId).addEventListener('click', () => {
+      $('#' + inputId).select();
+      document.execCommand('copy');
+      const n = $('#' + noteId);
+      n.textContent = 'Copied';
+      setTimeout(() => { n.textContent = ''; }, 1500);
+    });
+  }
+  wireCopy('peerLinkInput', 'copyNote1');
+  wireCopy('selfLinkInput', 'copyNote2');
+
+  $('#goCheck').addEventListener('click', () => {
+    state.tab = 'check';
+    viewCheckForm(res.sessionId);
+  });
+}
+
+/* ---------- Check-results flow ---------- */
+function viewCheckForm(prefillId, msg) {
+  const sid = prefillId || urlSessionId || '';
+  shell(`
+    <h1 class="page">Check your results</h1>
+    <p class="lede">Enter your session ID and the email you used to start your reflection.</p>
+    <form class="stack" id="checkForm" novalidate>
+      <label>Session ID<input id="sid" autocomplete="off" required value="${esc(sid)}"></label>
+      <label>Email<input id="cemail" type="email" autocomplete="email" required></label>
+      <p class="err" id="err" role="alert">${esc(msg || '')}</p>
+      <button class="btn" type="submit">Show my results</button>
+    </form>`);
+
+  $('#checkForm').addEventListener('submit', async ev => {
+    ev.preventDefault();
+    const sessionId = $('#sid').value.trim(), email = $('#cemail').value.trim();
+    loading('Checking your results');
+    try {
+      const data = await call('johariGetSession', { sessionId, email });
+      data.__creds = { sessionId, email };
+      viewResults(data);
+    } catch (e) { viewCheckForm(sessionId, e.message); }
+  });
+}
+
+function viewResults(r) {
+  if (!r.ready) {
+    shell(`
+      <h1 class="page">Almost there</h1>
+      <p class="lede">Your results unlock once at least ${r.minPeers} colleagues respond.</p>
+      <div class="progWrap">
+        <div class="progTrack"><i style="width:${Math.min(100, Math.round((r.totalPeers / r.minPeers) * 100))}%"></i></div>
+        <div class="progLabel">${r.totalPeers} of ${r.minPeers} responded so far</div>
+      </div>
+      <p class="fine">Check back once more colleagues have had a chance to respond, or use the same link again later.</p>`);
+    return;
+  }
+
+  const first = String(r.name).split(' ')[0];
+  const chip = (w, count) => `<span class="chip">${esc(w)}${count != null ? ` <b>${count}</b>` : ''}</span>`;
+
+  shell(`
+    <h1 class="page">${esc(first)}'s Johari Window</h1>
+    <p class="lede">${r.intro ? esc(r.intro) : 'How you see yourself, compared with how your colleagues described you.'}</p>
+    <p class="fine">${r.totalPeers} colleague${r.totalPeers === 1 ? '' : 's'} responded.</p>
+
+    <div class="quadGrid">
+      <div class="quad" style="--qc:var(--arena)">
+        <h3>Arena</h3>
+        <div class="sub">You see it, and so do they</div>
+        ${r.arena.length ? r.arena.map(x => chip(x.word, x.count)).join('') : '<p class="fine">No overlap yet.</p>'}
+      </div>
+      <div class="quad" style="--qc:var(--blind)">
+        <h3>Blind Spot</h3>
+        <div class="sub">They see it, you didn't pick it</div>
+        ${r.blind.length ? r.blind.map(x => chip(x.word, x.count)).join('') : '<p class="fine">None flagged.</p>'}
+      </div>
+      <div class="quad" style="--qc:var(--facade)">
+        <h3>Facade</h3>
+        <div class="sub">You picked it, no colleague did</div>
+        ${r.facade.length ? r.facade.map(w => chip(w)).join('') : '<p class="fine">None.</p>'}
+      </div>
+      <div class="quad" style="--qc:var(--muted)">
+        <h3>Unknown</h3>
+        <div class="sub">Neither you nor your colleagues picked these</div>
+        <p class="fine">${r.unknownCount} of ${r.totalWords} words</p>
+      </div>
+    </div>
+
+    <p class="fine" style="margin-top:10px">${r.disclaimer ? esc(r.disclaimer) : ''}</p>
+
+    <div class="actions">
+      <button class="btn" type="button" id="pdf">Download PDF report</button>
+    </div>
+    <p class="err" id="pdfErr" role="alert"></p>`);
+
+  $('#pdf').addEventListener('click', async () => {
+    const btn = $('#pdf'), err = $('#pdfErr');
+    err.textContent = '';
+    btn.disabled = true; btn.textContent = 'Preparing PDF';
+    try {
+      const f = await call('johariGetPdf', r.__creds);
+      const bytes = Uint8Array.from(atob(f.base64), ch => ch.charCodeAt(0));
+      const url = URL.createObjectURL(new Blob([bytes], { type: 'application/pdf' }));
+      const a = document.createElement('a');
+      a.href = url; a.download = f.filename;
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 10000);
+    } catch (e) {
+      err.textContent = e.message;
+    } finally {
+      btn.disabled = false; btn.textContent = 'Download PDF report';
+    }
+  });
+}
+
+/* ---------- Boot ---------- */
+if (state.tab === 'check') viewCheckForm(urlSessionId);
+else viewStart();
+</script>
+</body>
+</html>

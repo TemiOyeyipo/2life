@@ -1,0 +1,137 @@
+<!--
+  home.html — Self-Awareness Suite landing page.
+  Named "home.html" (not "index.html") because Code_gs.js's own header
+  comment lists index.html as the DISC quiz page itself. Rename either
+  file if your actual repo uses different filenames.
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<base target="_top">
+<meta charset="utf-8">
+<title>Self-Awareness Suite</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=Cinzel:wght@700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#142033; --paper:#F2F4F7; --white:#fff; --line:#D3D9E1; --muted:#586477;
+    --drive:#C1440E; --connection:#1F8A70; --insight:#2F6FE0; --influence:#7B4B94; --brass:#B98B4E;
+    --ui:'Bricolage Grotesque', system-ui, sans-serif;
+    --read:'Source Serif 4', Georgia, serif;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--ui);font-size:17px;line-height:1.5}
+  h1,h2,h3{font-weight:800;line-height:1.15;margin:0;letter-spacing:-.02em}
+  p{margin:0 0 1em}
+  a{color:inherit}
+  :focus-visible{outline:3px solid var(--ink);outline-offset:2px}
+
+  .top{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:16px clamp(16px,4vw,40px);border-bottom:1px solid var(--line);background:var(--white)}
+  .logo{height:34px;width:auto;display:block}
+  main{max-width:860px;margin:0 auto;padding:clamp(20px,5vw,56px) clamp(16px,4vw,40px)}
+  footer{max-width:860px;margin:0 auto;padding:0 clamp(16px,4vw,40px) 40px;color:var(--muted);font-size:14px}
+
+  h1.page{font-size:clamp(30px,5.5vw,46px);margin-bottom:12px;max-width:14ch}
+  .lede{font-family:var(--read);font-size:19px;color:#2b3850;max-width:42em}
+
+  .sequence{border-top:1px solid var(--line);margin-top:36px}
+  .step{
+    display:grid;grid-template-columns:110px 1fr auto;gap:24px;align-items:center;
+    padding:28px 0;border-bottom:1px solid var(--line);text-decoration:none;
+  }
+  .step-when{font-family:var(--read);font-style:italic;color:var(--muted);font-size:15px}
+  .step-body h2{font-size:21px;margin-bottom:6px}
+  .step-body p{font-size:14.5px;color:var(--muted);margin:0;max-width:52ch}
+  .accent{display:inline-block;height:3px;width:34px;margin-bottom:8px;border-radius:2px}
+  .step:nth-of-type(1) .accent{background:var(--connection)}
+  .step:nth-of-type(2) .accent{background:var(--drive)}
+  .step:nth-of-type(3) .accent{background:var(--insight)}
+  .step:nth-of-type(4) .accent{background:var(--influence)}
+
+  .go{
+    display:inline-block;font-weight:700;font-size:14px;padding:10px 18px;
+    border:1.5px solid var(--line);border-radius:999px;white-space:nowrap;
+    transition:border-color .15s ease, background .15s ease;
+  }
+  .step:hover .go{border-color:var(--ink);background:var(--paper)}
+
+  @media (max-width:620px){
+    .step{grid-template-columns:1fr;gap:6px}
+    .step-when{order:-1}
+  }
+</style>
+</head>
+<body>
+<header class="top">
+  <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+    <svg class="logo" viewBox="0 0 540 120" role="img" aria-label="L'chaim: Nourishing Life &amp; Spirit">
+      <g transform="translate(10, 0)">
+        <path d="M 55 18 L 55 10 M 39 24 L 34 19 M 71 24 L 76 19 M 28 40 L 20 38 M 82 40 L 90 38"
+              stroke="#D4A359" stroke-width="2.2" stroke-linecap="round" opacity="0.85"/>
+        <path d="M 30 65 A 28 28 0 1 1 80 65"
+              fill="none" stroke="#2C3E35" stroke-width="3.8" stroke-linecap="round"/>
+        <path d="M 55 38 C 36 55 32 78 55 94 C 78 78 74 55 55 38 Z" fill="#4A6B5D" opacity="0.95"/>
+        <path d="M 55 94 C 50 81 50 65 55 54 C 60 65 60 81 55 94 Z" fill="#C87D55"/>
+      </g>
+      <text x="125" y="66" font-family="'Cinzel', Georgia, serif" font-size="44" font-weight="700" letter-spacing="2.8" fill="#2C3E35">L'chaim</text>
+      <text x="127" y="88" font-family="Arial, Helvetica, sans-serif" font-size="11.5" font-weight="600" letter-spacing="4.5" fill="#C87D55" opacity="0.95">NOURISHING LIFE &amp; SPIRIT</text>
+    </svg>
+    <span style="width:1.5px;height:24px;background:var(--line)"></span>
+    <span style="font-size:15px;color:var(--muted);font-weight:800">Self-Awareness Suite</span>
+  </div>
+</header>
+
+<main>
+  <h1 class="page">See yourself from every angle.</h1>
+  <p class="lede">Four short reflections, one picture: what you're naturally good at, how you behave, how well you manage that behavior, and how it actually lands on the people around you.</p>
+
+  <div class="sequence">
+    <a class="step" href="strengths.html">
+      <div class="step-when">First</div>
+      <div class="step-body">
+        <span class="accent"></span>
+        <h2>Strengths Compass</h2>
+        <p>Forty-eight statements surface your top 5 Signature Strengths out of 24 themes, grouped into four domains — Drive, Connection, Insight, and Influence.</p>
+      </div>
+      <span class="go">Start &rarr;</span>
+    </a>
+
+    <a class="step" href="index.html">
+      <div class="step-when">Then</div>
+      <div class="step-body">
+        <span class="accent"></span>
+        <h2>DISC</h2>
+        <p>A quick read on your natural behavioral style — direct or steady, people-focused or detail-focused. Sets the vocabulary for everything after it.</p>
+      </div>
+      <span class="go">Start &rarr;</span>
+    </a>
+
+    <a class="step" href="eq.html">
+      <div class="step-when">Next</div>
+      <div class="step-body">
+        <span class="accent"></span>
+        <h2>Emotional Intelligence</h2>
+        <p>Forty statements across five areas — self-awareness, self-regulation, motivation, empathy, and social skill — to find where your real leverage is.</p>
+      </div>
+      <span class="go">Start &rarr;</span>
+    </a>
+
+    <a class="step" href="johari.html">
+      <div class="step-when">Finally</div>
+      <div class="step-body">
+        <span class="accent"></span>
+        <h2>Johari Window</h2>
+        <p>You choose a handful of words that describe you. Colleagues you invite do the same, without seeing your answers. The gap between the two is the most useful part.</p>
+      </div>
+      <span class="go">Start &rarr;</span>
+    </a>
+  </div>
+</main>
+
+<footer>
+  Each reflection sends you a result ID by email so you can reopen your report any time.
+</footer>
+</body>
+</html>
