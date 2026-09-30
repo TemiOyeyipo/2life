@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<base target="_top">
+<meta charset="utf-8">
+<title>DISC Leadership Profile</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=Cinzel:wght@700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#142033; --paper:#F2F4F7; --white:#fff; --line:#D3D9E1; --muted:#586477;
+    --d:#D93A3A; --i:#E59A00; --s:#2E9E6B; --c:#2F6FE0;
+    --ui:'Bricolage Grotesque', system-ui, sans-serif;
+    --read:'Source Serif 4', Georgia, serif;
+  }
+  *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--ui);font-size:17px;line-height:1.5}
+  h1,h2,h3{font-weight:800;line-height:1.1;margin:0;letter-spacing:-.02em}
+  p{margin:0 0 1em}
+  button{font:inherit;color:inherit;cursor:pointer}
+  :focus-visible{outline:3px solid var(--c);outline-offset:2px}
+
+  .top{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:16px clamp(16px,4vw,40px);border-bottom:1px solid var(--line);background:var(--white)}
+  .brand{font-weight:800;letter-spacing:-.01em}
+  .logo{height:34px;width:auto;display:block}
+  .logo-hero{height:56px;width:auto;display:block;margin-bottom:22px}
+  .link{background:none;border:0;padding:8px 0;text-decoration:underline;text-underline-offset:3px;font-weight:600;color:inherit}
+  main{max-width:1040px;margin:0 auto;padding:clamp(20px,5vw,56px) clamp(16px,4vw,40px)}
+  footer{max-width:1040px;margin:0 auto;padding:0 clamp(16px,4vw,40px) 40px;color:var(--muted);font-size:14px}
+
+  .btn{display:inline-block;border:0;border-radius:999px;padding:14px 28px;font-weight:700;background:var(--ink);color:#fff;min-height:48px}
+  .btn[disabled]{opacity:.35;cursor:not-allowed}
+  .btn.ghost{background:transparent;color:var(--ink);border:2px solid var(--ink)}
+
+  /* intro */
+  .intro{display:grid;gap:32px;align-items:center}
+  @media(min-width:860px){.intro{grid-template-columns:1.1fr .9fr}}
+  .intro h1{font-size:clamp(34px,6vw,60px);margin-bottom:18px}
+  .lede{font-family:var(--read);font-size:19px;color:#2b3850;max-width:34em}
+  form.stack{display:grid;gap:14px;margin-top:24px;max-width:460px}
+  label{display:grid;gap:6px;font-weight:600;font-size:15px}
+  input,select{font:inherit;padding:12px 14px;border:1.5px solid var(--line);border-radius:10px;background:#fff;min-height:48px}
+  .fine{font-size:14px;color:var(--muted);margin:0}
+  .err{color:#B3261E;font-weight:600;min-height:1.4em;margin:0}
+
+  /* wheel */
+  .wheel{width:100%;max-width:420px;height:auto;display:block;margin:0 auto}
+  .wheel .wl{font:800 34px var(--ui)}
+  .wheel .ax{font:600 10px var(--ui);fill:var(--muted)}
+  #dot{transition:transform 1.4s cubic-bezier(.2,.8,.2,1)}
+
+  /* test */
+  .test{max-width:720px;margin:0 auto}
+  .prog{height:6px;background:var(--line);border-radius:6px;overflow:hidden;margin-bottom:12px}
+  .prog i{display:block;height:100%;background:var(--ink);transition:width .3s}
+  .count{color:var(--muted);font-weight:600;font-size:14px;margin-bottom:10px}
+  .test h2{font-size:clamp(24px,4vw,32px);margin-bottom:22px;outline:none}
+  .wrow{display:grid;grid-template-columns:1fr auto auto;gap:10px;align-items:center;padding:12px 0;border-bottom:1px solid var(--line)}
+  .wrow span{font-size:20px;font-weight:600}
+  .pick{min-width:76px;min-height:48px;border-radius:12px;border:2px solid var(--line);background:#fff;font-weight:600}
+  .pick.most.on{background:var(--ink);border-color:var(--ink);color:#fff}
+  .pick.least.on{background:#fff;border-color:var(--ink);box-shadow:inset 0 0 0 2px var(--ink);text-decoration:line-through}
+  .nav{display:flex;justify-content:space-between;margin-top:26px;gap:12px}
+
+  .center{text-align:center;padding:60px 0}
+  .spin{width:34px;height:34px;border:4px solid var(--line);border-top-color:var(--ink);border-radius:50%;margin:0 auto 16px;animation:sp 0.9s linear infinite}
+  @keyframes sp{to{transform:rotate(360deg)}}
+
+  /* result */
+  .result-hero{display:grid;gap:28px;align-items:center;border-top:10px solid var(--accent);padding-top:28px}
+  @media(min-width:860px){.result-hero{grid-template-columns:1.1fr .9fr}}
+  .result-hero h1{font-size:clamp(32px,5.5vw,54px);margin-bottom:10px}
+  .nick{font-weight:700;font-size:20px;margin-bottom:10px}
+  .tag{font-family:var(--read);font-size:20px;color:#2b3850}
+  .idbox{display:inline-block;margin-top:8px;padding:10px 14px;border:1.5px dashed var(--muted);border-radius:10px;font-size:15px}
+  .idbox b{font-size:18px;letter-spacing:.06em}
+
+  .scores{margin:36px 0 8px;display:grid;gap:10px;max-width:640px}
+  .bar{display:grid;grid-template-columns:150px 1fr 34px;gap:12px;align-items:center;font-weight:600}
+  .track{height:14px;background:#E2E7ED;border-radius:8px;overflow:hidden}
+  .track i{display:block;height:100%}
+  @media(max-width:480px){.bar{grid-template-columns:110px 1fr 30px;font-size:15px}}
+  .note{color:var(--muted);font-size:14px;max-width:640px}
+
+  .tabs{display:flex;gap:6px;overflow-x:auto;margin:36px 0 0;border-bottom:2px solid var(--line);padding-bottom:0;scrollbar-width:thin}
+  .tab{background:none;border:0;padding:12px 16px;font-weight:600;white-space:nowrap;color:var(--muted);border-bottom:4px solid transparent;margin-bottom:-2px}
+  .tab[aria-selected=true]{color:var(--ink);border-bottom-color:var(--accent)}
+  .panel{padding:28px 0;max-width:760px}
+  .panel h3{font-size:24px;margin:26px 0 10px}
+  .panel h3:first-child{margin-top:0}
+  .panel p,.panel li{font-family:var(--read);font-size:19px;line-height:1.6}
+  .panel ul{padding-left:22px;margin:0 0 1em}
+  .panel li{margin-bottom:6px}
+  .two{display:grid;gap:24px}
+  @media(min-width:700px){.two{grid-template-columns:1fr 1fr}}
+  .other{border-left:8px solid var(--oc);padding:4px 0 4px 16px;margin-bottom:26px}
+  .other h3{margin:0 0 6px !important;font-size:22px !important}
+  .other p{margin-bottom:.4em}
+  .plan{list-style:none;padding:0}
+  .plan li{border-left:4px solid var(--accent);padding:6px 0 6px 16px;margin-bottom:14px}
+  .actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:34px}
+
+  @media (prefers-reduced-motion: reduce){
+    #dot,.prog i{transition:none}
+    .spin{animation-duration:2.5s}
+  }
+  @media print{
+    .top .link,.actions,.tabs,footer{display:none}
+    .panel[hidden]{display:block !important}
+  }
+</style>
+</head>
+<body>
+<header class="top">
+  <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+    <svg class="logo" viewBox="0 0 540 120" role="img" aria-label="L'chaim: Nourishing Life &amp; Spirit">
+      <g transform="translate(10, 0)">
+        <path d="M 55 18 L 55 10 M 39 24 L 34 19 M 71 24 L 76 19 M 28 40 L 20 38 M 82 40 L 90 38"
+              stroke="#D4A359" stroke-width="2.2" stroke-linecap="round" opacity="0.85"/>
+        <path d="M 30 65 A 28 28 0 1 1 80 65"
+              fill="none" stroke="#2C3E35" stroke-width="3.8" stroke-linecap="round"/>
+        <path d="M 55 38 C 36 55 32 78 55 94 C 78 78 74 55 55 38 Z" fill="#4A6B5D" opacity="0.95"/>
+        <path d="M 55 94 C 50 81 50 65 55 54 C 60 65 60 81 55 94 Z" fill="#C87D55"/>
+      </g>
+      <text x="125" y="66" font-family="'Cinzel', Georgia, serif" font-size="44" font-weight="700" letter-spacing="2.8" fill="#2C3E35">L'chaim</text>
+      <text x="127" y="88" font-family="Arial, Helvetica, sans-serif" font-size="11.5" font-weight="600" letter-spacing="4.5" fill="#C87D55" opacity="0.95">NOURISHING LIFE &amp; SPIRIT</text>
+    </svg>
+    <span style="width:1.5px;height:24px;background:var(--line)"></span>
+    <span class="brand" style="font-size:15px;color:var(--muted)">DISC Leadership Profile</span>
+  </div>
+  <div style="display:flex;align-items:center;gap:16px">
+    <a class="link" href="johari.html">Johari Window</a>
+    <button class="link" id="findBtn" type="button">Reopen my result</button>
+  </div>
+</header>
+<main id="app" aria-live="polite"></main>
+<footer>
+  DISC describes behavioural preferences from your own answers. It is a tool for reflection and development. It is not a clinical test and should not be used to make hiring or promotion decisions.
+</footer>
+
+<script src="config.js"></script>
+<script>
+/* ---------- helpers ---------- */
+const $ = (s, el) => (el || document).querySelector(s);
+const app = $('#app');
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const call = (fn, params) => fetch(CONFIG.API_URL, {
+  method: 'POST',
+  // No custom headers: this keeps it a "simple request" so the browser never
+  // sends a CORS preflight (OPTIONS), which Apps Script web apps can't answer.
+  body: JSON.stringify({ fn, ...(params || {}) })
+})
+  .then(res => res.json())
+  .then(data => {
+    if (!data || !data.ok) throw new Error((data && data.error) || 'Something went wrong. Please try again.');
+    return data.data;
+  })
+  .catch(err => { throw new Error(err.message || 'Could not reach the server. Please try again.'); });
+const ul = items => '<ul>' + items.map(i => '<li>' + esc(i) + '</li>').join('') + '</ul>';
+const COLORS = { D:'var(--d)', I:'var(--i)', S:'var(--s)', C:'var(--c)' };
+
+const state = { sets: [], i: 0, answers: {}, user: {} };
+
+/* ---------- DISC wheel (also the one memorable moment: the dot travels to your position) ---------- */
+function dotPos(p) {
+  let x = (p.I + p.S - p.D - p.C) / 140;   // people-focused (right) vs task-focused (left)
+  let y = (p.D + p.I - p.S - p.C) / 140;   // active (up) vs reflective (down)
+  const r = Math.hypot(x, y);
+  if (r > 1) { x /= r; y /= r; }
+  return { x: x * 100, y: -y * 100 };
+}
+function wheel(p) {
+  const dot = p ? dotPos(p) : null;
+  return `<svg class="wheel" viewBox="0 0 300 300" role="img" aria-label="DISC wheel. Dominance top left, Influence top right, Steadiness bottom right, Conscientiousness bottom left.${p ? ' Your position is marked with a dot.' : ''}">
+    <path d="M150 150 L150 32 A118 118 0 0 0 32 150Z" fill="var(--d)" fill-opacity=".2"/>
+    <path d="M150 150 L150 32 A118 118 0 0 1 268 150Z" fill="var(--i)" fill-opacity=".28"/>
+    <path d="M150 150 L268 150 A118 118 0 0 1 150 268Z" fill="var(--s)" fill-opacity=".22"/>
+    <path d="M150 150 L150 268 A118 118 0 0 1 32 150Z" fill="var(--c)" fill-opacity=".2"/>
+    <circle cx="150" cy="150" r="118" fill="none" stroke="var(--ink)" stroke-width="1.5"/>
+    <path d="M150 32V268M32 150H268" stroke="var(--ink)" stroke-opacity=".35"/>
+    <text class="wl" x="98" y="112" text-anchor="middle" fill="var(--d)">D</text>
+    <text class="wl" x="202" y="112" text-anchor="middle" fill="var(--i)">I</text>
+    <text class="wl" x="202" y="202" text-anchor="middle" fill="var(--s)">S</text>
+    <text class="wl" x="98" y="202" text-anchor="middle" fill="var(--c)">C</text>
+    <text class="ax" x="150" y="20" text-anchor="middle">Active</text>
+    <text class="ax" x="150" y="288" text-anchor="middle">Reflective</text>
+    <text class="ax" x="3" y="153">Tasks</text>
+    <text class="ax" x="297" y="153" text-anchor="end">People</text>
+    ${dot ? `<circle id="dot" cx="150" cy="150" r="10" fill="var(--ink)" stroke="#fff" stroke-width="3" data-x="${dot.x.toFixed(1)}" data-y="${dot.y.toFixed(1)}"/>` : ''}
+  </svg>`;
+}
+
+/* ---------- views ---------- */
+function viewIntro(msg) {
+  const u = state.user;
+  app.innerHTML = `
+  <section class="intro">
+    <div>
+      <h1>How do you lead, speak and get heard?</h1>
+      <p class="lede">Answer 24 quick questions about how you behave at work. You get a personal profile with practical ways to lead, communicate and work with people who are wired differently.</p>
+      <form class="stack" id="startForm" novalidate>
+        <label>Full name<input id="name" autocomplete="name" required value="${esc(u.name || '')}"></label>
+        <label>Email<input id="email" type="email" autocomplete="email" required value="${esc(u.email || '')}"></label>
+        <label>Which describes you best?
+          <select id="role">
+            ${['Leading a team','Aspiring leader','Individual contributor','Business owner','Other'].map(r => `<option ${u.role === r ? 'selected' : ''}>${r}</option>`).join('')}
+          </select>
+        </label>
+        <label>Team or group (optional)<input id="team" autocomplete="organization-title" value="${esc(u.team || '')}"></label>
+        <p class="fine">Takes about 8 minutes. Your name, email, team and answers are saved so you can reopen your result later. The person running this assessment can also see your results.</p>
+        <p class="err" id="err" role="alert">${esc(msg || '')}</p>
+        <button class="btn" type="submit">Start the assessment</button>
+      </form>
+    </div>
+    <div>${wheel(null)}</div>
+  </section>`;
+  $('#startForm').addEventListener('submit', async ev => {
+    ev.preventDefault();
+    const name = $('#name').value.trim(), email = $('#email').value.trim(), role = $('#role').value;
+    if (!name) return ($('#err').textContent = 'Enter your name to continue.');
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return ($('#err').textContent = 'Enter a valid email address.');
+    state.user = { name, email, role, team: $('#team').value.trim() };
+    viewLoading('Loading your questions');
+    try {
+      if (!state.sets.length) state.sets = await call('getQuestions');
+      state.i = 0; state.answers = {};
+      renderTest(true);
+    } catch (e) { viewIntro(e.message); }
+  });
+}
+
+function viewLoading(text) {
+  app.innerHTML = `<div class="center"><div class="spin"></div><p>${esc(text)}</p></div>`;
+}
+
+function renderTest(focusHeading) {
+  const n = state.sets.length, i = state.i, s = state.sets[i];
+  const a = state.answers[s.id] || (state.answers[s.id] = {});
+  const last = i === n - 1;
+  app.innerHTML = `
+  <section class="test">
+    <div class="prog" role="progressbar" aria-label="Progress" aria-valuemin="1" aria-valuemax="${n}" aria-valuenow="${i + 1}"><i style="width:${(i / n) * 100}%"></i></div>
+    <p class="count">Set ${i + 1} of ${n}</p>
+    <h2 tabindex="-1" id="q">At work, which word is most like you and which is least like you?</h2>
+    <div>
+      ${s.words.map(w => `
+        <div class="wrow">
+          <span>${esc(w)}</span>
+          <button type="button" class="pick most ${a.most === w ? 'on' : ''}" data-k="most" data-w="${esc(w)}" aria-pressed="${a.most === w}" aria-label="${esc(w)}: most like me">Most</button>
+          <button type="button" class="pick least ${a.least === w ? 'on' : ''}" data-k="least" data-w="${esc(w)}" aria-pressed="${a.least === w}" aria-label="${esc(w)}: least like me">Least</button>
+        </div>`).join('')}
+    </div>
+    <p class="err" id="err" role="alert"></p>
+    <div class="nav">
+      <button class="btn ghost" type="button" id="back" ${i === 0 ? 'disabled' : ''}>Back</button>
+      <button class="btn" type="button" id="next" ${a.most && a.least ? '' : 'disabled'}>${last ? 'See my profile' : 'Next'}</button>
+    </div>
+  </section>`;
+  if (focusHeading) $('#q').focus();
+
+  app.querySelectorAll('.pick').forEach(b => b.addEventListener('click', () => {
+    const k = b.dataset.k, w = b.dataset.w, other = k === 'most' ? 'least' : 'most';
+    if (a[other] === w) delete a[other];
+    if (a[k] === w) delete a[k]; else a[k] = w;
+    renderTest(false);
+    const again = [...app.querySelectorAll('.pick')].find(x => x.dataset.k === k && x.dataset.w === w);
+    if (again) again.focus();
+  }));
+  $('#back').addEventListener('click', () => { state.i--; renderTest(true); });
+  $('#next').addEventListener('click', () => { if (last) submit(); else { state.i++; renderTest(true); } });
+}
+
+async function submit() {
+  viewLoading('Scoring your answers');
+  try {
+    const answers = state.sets.map(s => ({ id: s.id, most: state.answers[s.id].most, least: state.answers[s.id].least }));
+    const report = await call('saveResult', { payload: { ...state.user, answers } });
+    state.creds = { id: report.id, email: state.user.email };
+    viewResult(report);
+  } catch (e) {
+    renderTest(true);
+    $('#err').textContent = e.message;
+  }
+}
+
+function viewFind(msg) {
+  app.innerHTML = `
+  <section class="test">
+    <h2>Reopen your result</h2>
+    <p class="lede">Enter the result ID from your email or results page, and the email address you used.</p>
+    <form class="stack" id="findForm" novalidate>
+      <label>Result ID<input id="rid" autocomplete="off" autocapitalize="characters" required></label>
+      <label>Email<input id="remail" type="email" autocomplete="email" required></label>
+      <p class="err" id="err" role="alert">${esc(msg || '')}</p>
+      <div class="nav" style="margin-top:0">
+        <button class="btn ghost" type="button" id="cancel">Back</button>
+        <button class="btn" type="submit">Show my result</button>
+      </div>
+    </form>
+  </section>`;
+  $('#cancel').addEventListener('click', () => viewIntro());
+  $('#findForm').addEventListener('submit', async ev => {
+    ev.preventDefault();
+    const id = $('#rid').value, email = $('#remail').value;
+    viewLoading('Finding your result');
+    try {
+      const report = await call('getResult', { id, email });
+      state.creds = { id: report.id, email: email.trim() };
+      viewResult(report);
+    }
+    catch (e) { viewFind(e.message); }
+  });
+}
+
+function viewResult(r) {
+  const c = r.content, accent = COLORS[r.primary];
+  const first = String(r.name).split(' ')[0];
+  const tabs = [
+    ['overview', 'Overview'], ['lead', 'Lead'], ['speak', 'Communicate'],
+    ['others', 'Read others'], ['stress', 'Under pressure'], ['plan', '30-day plan']
+  ];
+  const panels = {
+    overview: `
+      <h3>Who you are at work</h3><p>${esc(c.summary)}</p>
+      ${r.secondaryContent ? `<p>Your secondary style, <b>${esc(r.secondaryContent.name)}</b>, ${esc(r.secondaryContent.asSecondary)}</p>` : ''}
+      <div class="two">
+        <div><h3>Strengths to use</h3>${ul(c.strengths)}</div>
+        <div><h3>Blind spots to watch</h3>${ul(c.blindSpots)}</div>
+      </div>`,
+    lead: `
+      <h3>You at your best</h3><p>${esc(c.leadAtBest)}</p>
+      <h3>The risk to manage</h3><p>${esc(c.leadRisk)}</p>
+      <h3>Four moves that make you a stronger leader</h3>${ul(c.leadMoves)}`,
+    speak: `
+      <h3>How you naturally communicate</h3><p>${esc(c.commStyle)}</p>
+      <h3>Make your message land</h3>${ul(c.commTips)}`,
+    others: `
+      <p>People show their style in how they speak, decide and react. Adjust your approach to fit theirs.</p>
+      ${['D','I','S','C'].map(k => { const o = r.reading[k]; return `
+        <div class="other" style="--oc:${COLORS[k]}">
+          <h3>When you meet ${esc(r.labels[k])}</h3>
+          <p><b>You will notice:</b> ${esc(o.cues)}</p>
+          <p><b>They need:</b> ${esc(o.needs)}</p>
+          <p><b>Do:</b> ${o.doThis.map(esc).join(' ')}</p>
+          <p><b>Avoid:</b> ${o.avoid.map(esc).join(' ')}</p>
+        </div>`; }).join('')}`,
+    stress: `
+      <h3>What happens under pressure</h3><p>${esc(c.stress)}</p>
+      <h3>How to reset</h3>${ul(c.reset)}`,
+    plan: `
+      <p>Small, repeated changes beat big resolutions. Work through one week at a time.</p>
+      <ol class="plan">${c.plan.map(p => `<li>${esc(p)}</li>`).join('')}</ol>`
+  };
+
+  app.innerHTML = `
+  <div style="--accent:${accent}">
+    <section class="result-hero">
+      <div>
+        <h1>${esc(first)}, you lead with ${esc(c.name)}.</h1>
+        <p class="nick">${esc(c.nickname)}${r.secondaryContent ? ' with ' + esc(r.secondaryContent.name) + ' influence' : ''}</p>
+        <p class="tag">${esc(c.tagline)}</p>
+        <p class="idbox">Result ID <b>${esc(r.id)}</b><br><span class="fine">Keep it. With your email, it reopens this page. Taken ${esc(r.date)}.</span></p>
+      </div>
+      <div>${wheel(r.pct)}</div>
+    </section>
+
+    <section class="scores" aria-label="Your scores">
+      ${['D','I','S','C'].map(k => `
+        <div class="bar"><span>${k} ${esc(r.labels[k])}</span>
+          <div class="track"><i style="width:${r.pct[k]}%;background:${COLORS[k]}"></i></div><b>${r.pct[k]}</b></div>`).join('')}
+    </section>
+    <p class="note">Scores run from 0 to 100, and 50 means balanced. They compare your four styles with each other. Everyone uses all four, and higher does not mean better.</p>
+
+    <div class="tabs" role="tablist" aria-label="Your profile">
+      ${tabs.map((t, i) => `<button class="tab" role="tab" id="t-${t[0]}" aria-controls="p-${t[0]}" aria-selected="${i === 0}" data-t="${t[0]}">${t[1]}</button>`).join('')}
+    </div>
+    ${tabs.map((t, i) => `<div class="panel" role="tabpanel" id="p-${t[0]}" aria-labelledby="t-${t[0]}" ${i ? 'hidden' : ''}>${panels[t[0]]}</div>`).join('')}
+
+    <div class="actions">
+      <button class="btn" type="button" id="pdf">Download PDF report</button>
+      <button class="btn ghost" type="button" id="print">Print this page</button>
+      <button class="btn ghost" type="button" id="again">Take it again</button>
+    </div>
+    <p class="err" id="pdfErr" role="alert"></p>
+  </div>`;
+
+  app.querySelectorAll('.tab').forEach(tb => tb.addEventListener('click', () => {
+    app.querySelectorAll('.tab').forEach(x => x.setAttribute('aria-selected', x === tb));
+    app.querySelectorAll('.panel').forEach(p => p.hidden = p.id !== 'p-' + tb.dataset.t);
+  }));
+  $('#print').addEventListener('click', () => window.print());
+  $('#pdf').addEventListener('click', async () => {
+    const btn = $('#pdf'), err = $('#pdfErr');
+    err.textContent = '';
+    btn.disabled = true; btn.textContent = 'Preparing PDF';
+    try {
+      const f = await call('getPdf', { id: state.creds.id, email: state.creds.email });
+      const bytes = Uint8Array.from(atob(f.base64), ch => ch.charCodeAt(0));
+      const url = URL.createObjectURL(new Blob([bytes], { type: 'application/pdf' }));
+      const a = document.createElement('a');
+      a.href = url; a.download = f.filename;
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 10000);
+    } catch (e) {
+      err.textContent = e.message + ' You can also use "Print this page", or open the PDF attached to your results email.';
+    } finally {
+      btn.disabled = false; btn.textContent = 'Download PDF report';
+    }
+  });
+  $('#again').addEventListener('click', () => { state.sets = []; viewIntro(); });
+
+  const dot = $('#dot');
+  if (dot) requestAnimationFrame(() => requestAnimationFrame(() => {
+    dot.style.transform = `translate(${dot.dataset.x}px, ${dot.dataset.y}px)`;
+  }));
+  window.scrollTo({ top: 0 });
+}
+
+$('#findBtn').addEventListener('click', () => viewFind());
+viewIntro();
+</script>
+</body>
+</html>
