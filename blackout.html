@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Blackout Index</title>
+<style>
+  body{font-family:Arial,sans-serif;max-width:640px;margin:0 auto;padding:16px;color:#222}
+  h1{margin-bottom:4px} .sub{color:#666;font-size:14px;margin-bottom:16px}
+  h3{margin:24px 0 0;color:#1a5fb4}
+  label.f{display:block;font-weight:bold;margin:12px 0 4px}
+  input[type=text],select,textarea{width:100%;padding:8px;font-size:16px;box-sizing:border-box}
+  .q{margin:12px 0;padding:12px;border:1px solid #ddd;border-radius:8px}
+  .q p{margin:0 0 8px}
+  .scale{display:flex;justify-content:space-between;gap:4px}
+  .scale label{flex:1;text-align:center;font-size:14px;padding:6px 0;border:1px solid #ccc;border-radius:6px;cursor:pointer}
+  .scale input{display:block;margin:0 auto 2px}
+  .hint{font-size:12px;color:#777;margin-top:4px}
+  button{width:100%;padding:12px;font-size:16px;background:#1a5fb4;color:#fff;border:0;border-radius:8px;margin-top:16px;cursor:pointer}
+  button:disabled{background:#999}
+  #msg{margin-top:12px;font-weight:bold}
+</style>
+</head>
+<body>
+<h1>Blackout Index</h1>
+<div class="sub">
+  Imagine the leader is unavailable for 48 hours. Rate how true each statement is.<br>
+  If you are the leader rating yourself, choose "Self" and read "the leader" as "me".
+</div>
+
+<label class="f">Leader being rated</label>
+<input type="text" id="leader">
+<label class="f">I am rating as</label>
+<select id="type">
+  <option value="Team">Team member</option>
+  <option value="Self">Self (the leader)</option>
+</select>
+<label class="f">Your name (optional)</label>
+<input type="text" id="name">
+
+<div id="qs"></div>
+
+<label class="f">What is one decision the team would hesitate to make without the leader? (optional)</label>
+<textarea id="comment" rows="3"></textarea>
+
+<button id="btn" onclick="send()">Submit</button>
+<div id="msg"></div>
+
+<script>
+  // 1) Paste your Apps Script web app URL here (ends in /exec)
+  const API_URL = 'PASTE_YOUR_WEB_APP_URL_HERE';
+
+  const PARTS = [
+    { title: 'Part 1: Wait or Move', questions: [
+      'When the leader is unavailable, the team still makes good decisions.',
+      'People know which decisions they can make without approval.',
+      'Urgent client issues get resolved without waiting for the leader.',
+      'The team uses agreed principles when there is no clear answer.',
+      'Work does not stall when the leader is away.'
+    ]},
+    { title: 'Part 2: Escalate or Solve', questions: [
+      'When two people disagree, they resolve it themselves first.',
+      'People challenge each other\'s ideas openly and respectfully.',
+      'Escalation is a last resort, not a habit.',
+      'Managers coach their own people rather than sending problems upward.',
+      'Disagreements end in a clear decision, not a postponement.'
+    ]},
+    { title: 'Part 3: Protect or Respond', questions: [
+      'When a decision goes wrong, the team asks "what did we learn?" before "whose fault?"',
+      'People admit mistakes early.',
+      'Nobody avoids decisions out of fear of blame.',
+      'The team adapts quickly after a setback.',
+      'People take ownership of results, good or bad.'
+    ]}
+  ];
+
+  const ALL = [];
+  PARTS.forEach(function (p) { p.questions.forEach(function (q) { ALL.push(q); }); });
+
+  // Pre-fill leader from ?leader=Name
+  const params = new URLSearchParams(location.search);
+  if (params.get('leader')) document.getElementById('leader').value = params.get('leader');
+
+  // Build the questions
+  const wrap = document.getElementById('qs');
+  let idx = 0;
+  PARTS.forEach(function (part) {
+    wrap.insertAdjacentHTML('beforeend', '<h3>' + part.title + '</h3>');
+    part.questions.forEach(function (q) {
+      let opts = '';
+      for (let n = 1; n <= 5; n++) {
+        opts += '<label><input type="radio" name="q' + idx + '" value="' + n + '">' + n + '</label>';
+      }
+      wrap.insertAdjacentHTML('beforeend',
+        '<div class="q"><p>' + (idx + 1) + '. ' + q.replace(/"/g, '&quot;') + '</p>' +
+        '<div class="scale">' + opts + '</div>' +
+        '<div class="hint">1 = Never &nbsp;&middot;&nbsp; 5 = Always</div></div>');
+      idx++;
+    });
+  });
+
+  async function send() {
+    const msg = document.getElementById('msg');
+    const btn = document.getElementById('btn');
+    const leader = document.getElementById('leader').value.trim();
+    if (!leader) { msg.textContent = 'Please enter the leader\'s name.'; return; }
+
+    const answers = [];
+    for (let i = 0; i < ALL.length; i++) {
+      const c = document.querySelector('input[name="q' + i + '"]:checked');
+      if (!c) { msg.textContent = 'Please answer question ' + (i + 1) + '.'; return; }
+      answers.push(Number(c.value));
+    }
+
+    btn.disabled = true;
+    msg.textContent = 'Submitting...';
+    try {
+      // Sent as text/plain so the browser skips the CORS preflight that Apps Script cannot answer
+      const res = await fetch(API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify({
+          leader: leader,
+          type: document.getElementById('type').value,
+          name: document.getElementById('name').value,
+          comment: document.getElementById('comment').value,
+          answers: answers
+        })
+      });
+      const out = await res.json();
+      if (out.status !== 'ok') throw new Error(out.message || 'Server error');
+      msg.textContent = 'Thank you. Your response was recorded.';
+    } catch (err) {
+      msg.textContent = 'Something went wrong: ' + err.message;
+      btn.disabled = false;
+    }
+  }
+</script>
+</body>
+</html>
