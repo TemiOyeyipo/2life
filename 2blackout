@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Blackout Index</title>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,wght@0,500;0,600;1,500&family=Work+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--cream:#F1E8D6;--plum:#2F1C25;--gold:#C8912A;--paper:#F8F2E4;--ink:#2A2118;--soft:rgba(42,33,24,.68)}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--cream);color:var(--ink);font-family:'Work Sans',sans-serif;line-height:1.6}
+.top{background:var(--plum);color:var(--cream);padding:48px 24px 40px;text-align:center}
+.top h1{font-family:'Newsreader',serif;font-style:italic;font-weight:500;font-size:2.8rem;line-height:1.15}
+.top p{max-width:620px;margin:14px auto 0;color:rgba(241,232,214,.78)}
+.wrap{max-width:760px;margin:0 auto;padding:32px 20px 80px}
+.card{background:var(--paper);padding:28px;margin-bottom:24px;border:1px solid rgba(47,28,37,.1)}
+.card h2{font-family:'Newsreader',serif;font-size:1.5rem;margin-bottom:10px}
+.card p,.card li{color:var(--soft);font-size:.95rem}
+.card ul{margin:10px 0 0 20px}
+.field{display:block;margin-top:14px}
+.field span{display:block;font-weight:600;font-size:.88rem;margin-bottom:4px}
+.field input{width:100%;padding:11px 12px;border:1px solid rgba(47,28,37,.25);background:#fff8;font:inherit}
+.scale{display:flex;justify-content:space-between;font-size:.75rem;color:var(--soft);margin:18px 0 6px}
+.q{padding:18px 0;border-top:1px solid rgba(47,28,37,.12)}
+.q p{color:var(--ink);font-weight:500;margin-bottom:10px}
+.opts{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
+.opts label{cursor:pointer}
+.opts input{position:absolute;opacity:0}
+.opts span{display:block;text-align:center;padding:9px 0;border:1px solid rgba(47,28,37,.25);font-weight:600}
+.opts input:checked+span{background:var(--plum);color:var(--cream);border-color:var(--plum)}
+.opts input:focus-visible+span{outline:2px solid var(--gold);outline-offset:2px}
+.q.missing{background:rgba(200,145,42,.12)}
+.btn{display:inline-block;background:var(--gold);color:#fff;border:0;padding:14px 28px;font:600 .95rem 'Work Sans',sans-serif;cursor:pointer;text-decoration:none}
+.btn:hover{background:#a97a1f}.btn.alt{background:var(--plum)}
+.msg{margin-top:12px;font-size:.88rem;color:#8a3b1f}
+.progress{position:sticky;top:0;background:var(--paper);padding:8px 0;font-size:.82rem;color:var(--soft);z-index:2}
+.score{font-family:'Newsreader',serif;font-size:3rem;color:var(--plum);line-height:1}
+.link{word-break:break-all;background:#fff8;border:1px dashed var(--gold);padding:12px;margin:12px 0;font-size:.88rem;color:var(--ink)}
+@media(max-width:520px){.top h1{font-size:2.2rem}}
+</style>
+</head>
+<body>
+<header class="top">
+  <h1>Blackout Index</h1>
+  <p>Imagine the leader is unavailable for 48 hours. Rate how true each statement is.</p>
+</header>
+<main class="wrap">
+  <section class="card" id="intro"></section>
+  <section id="formArea"></section>
+  <section class="card" id="done" hidden></section>
+</main>
+
+<script>
+// ==== PASTE your Apps Script Web App URL here ====
+const WEBAPP_URL = 'PASTE_YOUR_WEB_APP_URL_HERE';
+
+const STATEMENTS = [
+  'Urgent decisions would get made without waiting to reach the leader.',
+  'Everyone knows which decisions they can make without asking the leader.',
+  'Important processes are documented, so nobody needs to ask the leader how things are done.',
+  'Key clients and partners have a trusted contact besides the leader.',
+  'Someone is clearly named to stand in for the leader.',
+  'Team members feel confident acting without checking with the leader first.',
+  'If something went wrong, the team would fix it rather than wait for the leader.',
+  'People understand the reasons behind decisions, not just the instructions.',
+  'Spending and approvals could go ahead without the leader being reachable.',
+  'The team would stay calm and focused, not anxious, if the leader were unreachable.',
+  'Priorities are clear enough that everyone would know what matters most without hearing from the leader.',
+  'The team would handle a sensitive or unexpected situation without needing to contact the leader.'
+];
+const BANDS = [
+  [0, 'Fragile', 'Everything waits for the leader.'],
+  [40, 'Developing', 'The team can cope, but it would struggle.'],
+  [60, 'Capable', 'The team can hold steady, with a few weak spots.'],
+  [80, 'Resilient', 'The team carries on, and the leader can rest.']
+];
+
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const leaderId = new URLSearchParams(location.search).get('id');
+const mode = leaderId ? 'team' : 'self';
+const band = p => BANDS.filter(b => p >= b[0]).pop();
+const phrase = t => mode === 'self'
+  ? t.replace(/the leader is/g, 'I am').replace(/the leader were/g, 'I were').replace(/the leader/g, 'me')
+  : t;
+const doneKey = 'bi_done_' + (leaderId || 'self');
+const safeGet = k => { try { return localStorage.getItem(k); } catch (e) { return null; } };
+const safeSet = (k, v) => { try { localStorage.setItem(k, v); } catch (e) {} };
+
+async function api(action, payload) {
+  if (!WEBAPP_URL || WEBAPP_URL.startsWith('PASTE')) return { ok: false, error: 'The backend URL has not been set up yet.' };
+  try {
+    const res = await fetch(WEBAPP_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ action, ...payload })
+    });
+    return await res.json();
+  } catch (e) { return { ok: false, error: 'Could not reach the server. Check your connection and try again.' }; }
+}
+
+function renderForm(extraFields) {
+  const rows = STATEMENTS.map((t, i) => `
+    <div class="q" id="q${i}">
+      <p>${i + 1}. ${esc(phrase(t))}</p>
+      <div class="opts">${[1,2,3,4,5].map(n =>
+        `<label><input type="radio" name="q${i}" value="${n}"><span>${n}</span></label>`).join('')}</div>
+    </div>`).join('');
+  $('formArea').innerHTML = `
+    <div class="card">
+      ${extraFields}
+      <div class="scale"><span>1 = Not true at all</span><span>5 = Completely true</span></div>
+      <div class="progress" id="progress">0 of ${STATEMENTS.length} answered</div>
+      ${rows}
+      <button class="btn" id="submitBtn" type="button">Submit assessment</button>
+      <p class="msg" id="msg" role="alert"></p>
+    </div>`;
+  $('formArea').addEventListener('change', () => {
+    const n = STATEMENTS.filter((_, i) => document.querySelector(`input[name=q${i}]:checked`)).length;
+    $('progress').textContent = `${n} of ${STATEMENTS.length} answered`;
+  });
+  $('submitBtn').addEventListener('click', submit);
+}
+
+function collect() {
+  const answers = [];
+  let firstMissing = null;
+  STATEMENTS.forEach((_, i) => {
+    const el = document.querySelector(`input[name=q${i}]:checked`);
+    $('q' + i).classList.toggle('missing', !el);
+    if (el) answers.push(Number(el.value)); else if (firstMissing === null) firstMissing = i;
+  });
+  return { answers, firstMissing };
+}
+
+async function submit() {
+  const msg = $('msg'); msg.textContent = '';
+  const { answers, firstMissing } = collect();
+  let payload;
+  if (mode === 'self') {
+    const name = $('name').value.trim(), email = $('email').value.trim();
+    if (!name) { msg.textContent = 'Enter your name.'; return; }
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) { msg.textContent = 'Enter a valid email so we can send your results.'; return; }
+    payload = { name, email };
+  } else {
+    payload = { leaderId, raterName: ($('rater').value || '').trim() };
+  }
+  if (firstMissing !== null) {
+    msg.textContent = 'Please answer every statement. The highlighted ones are missing.';
+    $('q' + firstMissing).scrollIntoView({ behavior: 'smooth', block: 'center' });
+    return;
+  }
+  const btn = $('submitBtn'); btn.disabled = true; btn.textContent = 'Sending…';
+  const base = location.origin + location.pathname;
+  const res = await api(mode === 'self' ? 'submitself' : 'submitteam', { ...payload, answers, baseUrl: base });
+  btn.disabled = false; btn.textContent = 'Submit assessment';
+  if (!res.ok) { msg.textContent = res.error || 'Something went wrong. Please try again.'; return; }
+  safeSet(doneKey, '1');
+  $('formArea').innerHTML = '';
+  mode === 'self' ? showSelfDone(res, base) : showTeamDone(res);
+}
+
+function showSelfDone(res, base) {
+  const link = `${base}?id=${res.leaderId}`;
+  const b = band(res.pct);
+  const text = `Please take 3 minutes to rate how our team would run without me for 48 hours: ${link}`;
+  $('done').hidden = false;
+  $('done').innerHTML = `
+    <h2>Your self-assessment is saved</h2>
+    <p class="score">${res.pct}%</p>
+    <p><strong>${esc(b[1])}.</strong> ${esc(b[2])}</p>
+    <h2 style="margin-top:24px">Next: get three team members to rate you</h2>
+    <p>Send them this link. Each person answers once, and the full report is emailed to you after the third response.</p>
+    <div class="link" id="shareLink">${esc(link)}</div>
+    <button class="btn alt" id="copyBtn" type="button">Copy link</button>
+    <a class="btn" target="_blank" rel="noopener" href="https://wa.me/?text=${encodeURIComponent(text)}">Share on WhatsApp</a>
+    <p class="msg" style="color:var(--soft)">We also emailed this link to you. Keep it safe: anyone with it can submit a response.</p>`;
+  $('copyBtn').onclick = async () => {
+    try { await navigator.clipboard.writeText(link); $('copyBtn').textContent = 'Copied ✓'; }
+    catch (e) { const r = document.createRange(); r.selectNode($('shareLink')); getSelection().removeAllRanges(); getSelection().addRange(r); }
+  };
+}
+
+function showTeamDone(res) {
+  $('done').hidden = false;
+  $('done').innerHTML = `
+    <h2>Thank you</h2>
+    <p>Your response has been recorded. ${res.count} of ${res.needed} responses are in.
+    ${res.count >= res.needed ? 'The report has now been sent.' : 'The report is sent once all three are complete.'}</p>
+    <p style="margin-top:10px">You can close this page.</p>`;
+}
+
+async function init() {
+  if (mode === 'self') {
+    $('intro').innerHTML = `
+      <h2>Rate yourself first</h2>
+      <p>You are taking the <strong>Self</strong> version, so read "the leader" as "me." Answer based on what would actually happen, not what you hope would happen.</p>
+      <ul>
+        <li>It shows where the team depends on you being available.</li>
+        <li>It shows how well authority and know-how have been shared.</li>
+        <li>After you submit, you get a link for three team members. Their combined view is compared with yours.</li>
+      </ul>`;
+    renderForm(`
+      <label class="field"><span>Your name</span><input id="name" maxlength="80" autocomplete="name"></label>
+      <label class="field"><span>Your email (your results are sent here)</span><input id="email" type="email" maxlength="120" autocomplete="email"></label>`);
+    return;
+  }
+  if (safeGet(doneKey)) {
+    $('intro').innerHTML = '<h2>Already submitted</h2><p>This device has already sent a response for this assessment. Thank you!</p>';
+    return;
+  }
+  let info = null;
+  try {
+    const r = await fetch(`${WEBAPP_URL}?action=getleader&id=${encodeURIComponent(leaderId)}`);
+    info = await r.json();
+  } catch (e) {}
+  if (!info || !info.ok) {
+    $('intro').innerHTML = '<h2>Link not valid</h2><p>This link could not be found. Ask the leader to send it again.</p>';
+    return;
+  }
+  if (info.count >= info.needed) {
+    $('intro').innerHTML = '<h2>This assessment is complete</h2><p>All responses have been collected. Thank you!</p>';
+    return;
+  }
+  $('intro').innerHTML = `
+    <h2>Rate <span id="ln"></span></h2>
+    <p>Imagine the leader is completely unavailable for 48 hours: no calls, no messages, no approvals. For each statement, rate how true it would be for your team. Be honest. Only the combined results of all responses are reported to the leader.</p>`;
+  $('ln').textContent = info.name;
+  renderForm(`<label class="field"><span>Your name (optional)</span><input id="rater" maxlength="80"></label>`);
+}
+init();
+</script>
+</body>
+</html>
